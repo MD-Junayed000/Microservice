@@ -13,26 +13,24 @@ export default function Login() {
     setLoading(true);
     setError('');
 
-    // Simulate login validation
-    if (!email || !password) {
-      setError('Please fill in all fields');
-      setLoading(false);
-      return;
+    try {
+      const res = await fetch('http://localhost:3001/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        // Decode JWT to get user info (for demo, just store email)
+        login({ email });
+        localStorage.setItem('token', data.token);
+      } else {
+        setError(data.error || 'Login failed');
+      }
+    } catch (err) {
+      setError('Network error');
     }
-
-    // Simulate API call delay
-    setTimeout(() => {
-      // For demo purposes, accept any email/password
-      const userData = {
-        id: 'user123',
-        name: email.split('@')[0], // Use email prefix as name
-        email: email,
-        role: 'student'
-      };
-      
-      login(userData);
-      setLoading(false);
-    }, 1000);
+    setLoading(false);
   };
 
   return (

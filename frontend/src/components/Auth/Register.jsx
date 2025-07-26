@@ -14,32 +14,23 @@ export default function Register() {
     setLoading(true);
     setError('');
 
-    // Simulate registration validation
-    if (!email || !password || !name) {
-      setError('Please fill in all fields');
-      setLoading(false);
-      return;
+    try {
+      const res = await fetch('http://localhost:3001/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        register({ name, email });
+        localStorage.setItem('token', data.token);
+      } else {
+        setError(data.error || 'Registration failed');
+      }
+    } catch (err) {
+      setError('Network error');
     }
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      setLoading(false);
-      return;
-    }
-
-    // Simulate API call delay
-    setTimeout(() => {
-      // For demo purposes, create user with provided data
-      const userData = {
-        id: 'user' + Date.now(),
-        name: name,
-        email: email,
-        role: 'student'
-      };
-      
-      register(userData);
-      setLoading(false);
-    }, 1000);
+    setLoading(false);
   };
 
   return (
