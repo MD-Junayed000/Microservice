@@ -27,4 +27,15 @@ services:
       - mongo
     ports:
       - "3002:3000"
+      
+  trip:
+    build: ./services/trip
+    environment:
+      - PORT=3000
+      - MONGO_URL=mongodb://mongo:27017/trip_db
+      - JWT_SECRET=mySuperSecret       # must match Auth & Ride
+    depends_on:
+      - mongo
+    ports:
+      - "3003:3000"
 
