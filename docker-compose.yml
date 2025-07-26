@@ -1,0 +1,46 @@
+services:
+  # --- existing infra ---
+  mongo:
+    image: mongo:6
+    ports: ["27017:27017"]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports: 
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin
+
+  # --- new Auth container ---
+  auth:
+    build: ./services/auth
+    environment:
+      - PORT=3000
+      - MONGO_URL=mongodb://mongo:27017/auth_db
+      - JWT_SECRET=mySuperSecret            # or ${JWT_SECRET} from .env
+    depends_on:
+      - mongo
+    ports:
+      - "3001:3000"        # host 3001 → container 3000
+
+  # --- Trip service ---
+  trip:
+    build: ./services/trip
+    environment:
+      - PORT=3004
+      - MONGO_URL=mongodb://mongo:27017/trip_db
+      - REDIS_URL=redis://redis:6379
+      - RABBITMQ_URL=amqp://admin:admin@rabbitmq:5672
+      - JWT_SECRET=mySuperSecret
+    depends_on:
+      - mongo
+      - redis
+      - rabbitmq
+    ports:
+      - "3004:3004"
