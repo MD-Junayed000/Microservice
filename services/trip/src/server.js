@@ -3,6 +3,7 @@ const mongoose  = require('mongoose');
 const cfg       = require('./config/env');
 const tripRoutes = require('./routes/tripRoutes');
 const cors      = require('cors');
+const logger = require('../../shared/logger');
 
 const app = express();
 app.use(express.json());
